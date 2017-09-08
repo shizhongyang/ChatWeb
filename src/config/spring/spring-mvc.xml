@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans   
+    http://www.springframework.org/schema/beans/spring-beans.xsd  
+    http://www.springframework.org/schema/context  
+    http://www.springframework.org/schema/context/spring-context-3.2.xsd  
+    http://www.springframework.org/schema/mvc  
+    http://www.springframework.org/schema/mvc/spring-mvc-3.2.xsd"
+	default-autowire="byName">
+	<!-- 以下 validator ConversionService 在使用 mvc:annotation-driven 会 自动注册 -->
+	<bean id="validator"
+		class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean">
+		<property name="providerClass" value="org.hibernate.validator.HibernateValidator" />
+		<!-- 如果不加默认到 使用classpath下的 ValidationMessages.properties -->
+		<!-- <property name="validationMessageSource" ref="messageSource" /> -->
+	</bean>
+
+
+	<!-- 开启注解，java文件里的@ validator="validator" -->
+	<mvc:annotation-driven validator="validator" />
+	<mvc:default-servlet-handler />
+
+	<!-- hibernate-validator-4.3.1.Final.jar hibernate-validator-annotation-processor-4.3.2.Final.jar -->
+	<!-- 注解扫描包，注意换成自己的路径 -->
+	<context:component-scan base-package="com.shixin.chat.modules.user">
+		<!-- <context:include-filter type="annotation" expression="org.springframework.stereotype.Service" 
+			/> <context:include-filter type="annotation" expression="org.springframework.stereotype.Repository" 
+			/> -->
+		<!-- 只扫描@Controller的部分 -->
+		<context:include-filter type="annotation"
+			expression="org.springframework.stereotype.Controller" />
+	</context:component-scan>
+
+	<!--完成请求和注解POJO的映射 -->
+	<bean
+		class="org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor" />
+
+	<!-- 静态资源(js/image)的访问 ，可添加多个 -->
+	<mvc:resources location="/js/" mapping="/js/**" />
+
+	<!-- 定义视图解析器 -->
+	<bean id="viewResolver"
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/"></property>
+		<property name="suffix" value=".jsp"></property>
+		<property name="contentType" value="text/html;charset=utf-8" />
+	</bean>
+
+
+
+	<!-- 上传文件 -->
+	<bean id="multipartResolver"
+		class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<property name="defaultEncoding" value="utf-8" />
+		<!-- 最大内存大小 -->
+		<property name="maxInMemorySize" value="10240" />
+		<!-- 最大文件大小，-1为不限制大小 -->
+		<property name="maxUploadSize" value="-1" />
+	</bean>
+</beans>  
